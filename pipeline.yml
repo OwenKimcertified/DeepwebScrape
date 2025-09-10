@@ -1,0 +1,35 @@
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: Q1
+    ports:
+      - "27017:27017"
+    volumes:
+      - ${PWD}/backup/test_web:/backup
+      - data:/data/db
+    networks:
+      - recruit
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: analyzer
+    depends_on:
+      - mongo
+    volumes:
+      - .:/app
+      - ./raw:/app/raw       # raw 디렉토리 볼륨 마운트
+      - ./logs:/app/logs     # 로그 디렉토리 마운트
+    networks:
+      - recruit
+    environment:
+      - LOG_MODE=batch
+      - PYTHONUNBUFFERED=1
+
+volumes:
+  data:
+
+networks:
+  recruit:
+    name: recruit
